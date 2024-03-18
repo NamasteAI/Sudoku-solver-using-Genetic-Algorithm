@@ -1,0 +1,247 @@
+# Initialize Constants
+GRID_SIZE
+POPULATION_SIZE
+MAX_GENERATIONS
+CROSSOVER_RATE
+MUTATION_RATE
+APPROACH = { 'random', 'wheel', 'rank' }
+TOURNAMENT_SIZE
+
+
+# Main Genetic Algorithm Function
+function GeneticAlgorithm():
+    population = InitializePopulation()
+    for generation in range(1, MAX_GENERATIONS+1):
+        fitnessScores = ComputePopulationFitness(generation)
+        newPopulation = SelectElite(generation, fitnessScores)
+        while len(newPopulation) < POPULATION_SIZE:
+            parent1, parent2 = SelectParents(population, fitnessScores, APPROACH)
+            offspring1, offspring2 = PerformCrossover(parent1, parent2)
+            Mutate(offspring1)
+            Mutate(offspring2)
+            AddToPopulation(newPopulation, offspring1, offspring2)
+        population = newPopulation
+        if SolutionFound(population):
+            break
+    ProcessResults(population)
+
+
+# Parent Selection
+function SelectParents(generation, fitnessScores, approach):
+    if approach == 'random':
+        return RandomSelection(generation)
+    elif approach == 'wheel':
+        return RouletteWheelSelection(generation, fitnessScores)
+    elif approach == 'tournament':
+        return TournamentSelection(generation, fitnessScores, TOURNAMENT_SIZE)
+    elif approach == 'rank':
+        return RankSelection(generation, fitnessScores)
+
+# Elite Selection
+function SelectElite(generation, fitnessScores, EliteSize):
+    # Selects a portion of the best chromosomes to carry over directly to the next generation
+    # Sort generation by fitnessScores and select the top N to carry over
+    generationFitness = ComputePopulationFitness(generation)
+    sort(generation, key=score)
+    return first EliteSize elements of sorted generation
+
+
+# SELECTION FUNCTIONS:
+# Random Selection
+function RandomSelection(generation):
+    # Selects two parents randomly from the generation without regard to fitness
+    return random.sample(generation, 2)
+
+
+# Roulette Wheel Selection
+function RouletteWheelSelection(generation, fitnessScores, EliteSize):
+    # Parents are selected with a probability proportional to their fitness
+    scoreArray = ComputePopulationFitness(generation) 
+    # Make array with number of elements == to score size (ensure number == ints or scale up to decent roudning)
+    ProportionArray
+    for chromosome in generation:
+        for i in range(scoreArray[chromosomeIndex]):
+            ProportionArray.add(chromosome)
+    return random.sample(ProportionArray, EliteSize)
+
+# Tournament Selection
+function TournamentSelection(generation, fitnessScores, tournamentSize):
+    # A subset of the generation competes, and the best one is selected
+    tournament = random.sample(tournamentSize)
+    newArray = ComputePopulationFitness(tournament)
+    sort(newArray, key=fitnessScore)
+    return newArray[0]
+
+# Rank Selection
+function RankSelection(generation, EliteSize):
+    # Parents are selected based on their ranking in the population according to fitness
+    # Example: Sort generation by fitness, select top ranks
+    return SortElite(generation)[EliteSize:] 
+
+
+GENETIC FUNCTIONS:
+# Crossover
+function PerformCrossover(parent1, parent2, crossoverPoint):
+    # Creates offspring by combining parts of the parents' chromosomes
+    # Note: parents must be flattened, flatten otherwise
+    if random < CROSSOVER_RATE then swap segments after a random/defined crossover point
+        child1 = parent1[crossoverPoint:] + parent2[:crossoverPoint] 
+        child1 = parent2[crossoverPoint:] + parent1[:crossoverPoint] 
+    return child1, child2  # unflatten on output        
+
+# Mutation
+
+FUNCTION Mutate(chromosome, initialGrid)
+    # Randomly mutates the chromosome if a random number is below MUTATION_RATE
+    # Preserves the original letters' positions from the initialGrid
+
+    IF random() < MUTATION_RATE THEN
+        # Flatten the initialGrid and chromosome by converting them to 1D lists
+        flattenedGrid = Flatten(initialGrid)
+        flattenedChromosome = Flatten(chromosome)
+
+        # Identify the fixed positions where original letters must remain unchanged
+        fixedPositions = {}
+        FOR i FROM 0 TO LENGTH(flattenedGrid) - 1
+            IF flattenedGrid[i] != '_' THEN
+                fixedPositions[i] = TRUE
+            END IF
+        END FOR
+
+        # Find two random, non-fixed positions in the chromosome for swapping
+        validIndices = []
+        FOR i FROM 0 TO LENGTH(flattenedChromosome) - 1
+            IF NOT fixedPositions[i] THEN
+                APPEND i TO validIndices
+            END IF
+        END FOR
+
+        IF LENGTH(validIndices) > 1 THEN
+            # Ensure two distinct indices are chosen
+            randomIdx0, randomIdx1 = ChooseTwoRandomDistinctIndices(validIndices)
+
+            # Swap the values at the selected positions
+            temp = flattenedChromosome[randomIdx0]
+            flattenedChromosome[randomIdx0] = flattenedChromosome[randomIdx1]
+            flattenedChromosome[randomIdx1] = temp
+        END IF
+
+        # Reconstruct the mutated chromosome into its original 2D structure
+        mutatedChromosome = Reconstruct(flattenedChromosome, GRID_SIZE)
+    END IF
+
+    RETURN chromosome
+
+END FUNCTION
+
+
+# HELPER FUNCTIONS:
+#Flattten grid to return a 1D list
+FUNCTION Flatten(grid)
+    # Initialize an empty list to hold the flattened grid
+    flattenedList = []
+    FOR each row IN grid
+        # Iterate through each element in the row
+        FOR each element IN row
+            # Append the element to the flattened list
+            APPEND element TO flattenedList
+        END FOR
+    END FOR
+    RETURN flattenedList
+END FUNCTION
+
+# Population Initialization
+function InitializePopulation():
+    # Generates initial population of chromosomes
+    populationArray
+    # Each chromosome is a GRID_SIZE x GRID_SIZE grid
+    for i in POPULATION_SIZE:
+        chromosome = Array(GRID_SIZE, GRID_SIZE)  # leverage numpy or equivalent?
+        populationArray.add(chromosome)
+
+
+# Fitness Computation
+function ComputePopulationFitness(generation):
+    # Calculates the fitness for each chromosome in the generation
+    # Fitness could be based on some criteria like the number of correct words formed
+    declare result_array
+    for each chromosome in generation:
+        add ComputeFitness(generation) to result_array
+    return result_array
+
+
+function ComputeFitness (chromosome):
+    # Initialize fitness to GRID_SIZE multiplied by 3
+    # Applies penalties for row, col and subgrid
+    # Loop through each row in the grid to check for duplicates and subgrid checks
+    For i from 0 to GRID_SIZE - 1:
+        Assign the ith row of the grid to variable row
+
+        # Check for unique letters in the current row
+        If the number of unique letters in row is less than GRID_SIZE:
+            Decrease fitness by 1 to penalize for duplicate letters in the row
+        
+        # Check subgrids for unique letters
+        # Only perform this check on rows that start a subgrid (even-numbered rows)
+        If i is even:
+            For each subgrid starting point j in [0, 2]:
+                Create a subgrid by combining:
+                    - The two letters from the current row at positions j and j+1
+                    - The two letters from the next row at positions j and j+1
+                
+                # Check if the subgrid has fewer unique letters than GRID_SIZE
+                If the number of unique letters in the subgrid is less than GRID_SIZE:
+                    Decrease fitness by 1 to penalize for duplicate letters in the subgrid
+    return fitnessScore
+
+    # Loop through each column in the grid to check for duplicates and missing letters
+    For j from 0 to GRID_SIZE - 1:
+        Create a list column that contains the jth letter from each row
+
+        # Check for unique letters in the column and presence of all required letters
+        If the number of unique letters in column is less than GRID_SIZE or
+           not all predefined letters are present in the column:
+            Decrease fitness by 1 to penalize for duplicates or missing letters in the column
+
+    return the calculated fitness value
+
+
+# Solution Checking
+function ChromoseIsValid(chromosome):
+    if ComputeFitness(chromosome) == maxFitnessScore  # as defined in ComputeFitness
+    return TRUE
+
+function SolutionFound(population):
+    # Checks if any chromosome in the population meets the solution criteria
+    for chromosome in population:
+        if ChromoseIsValid():
+            return chromosome
+
+# function WordOnEdge(chromosome):
+    # checks if the chromosome has a full word on the edge as per the original provided word
+    correctWord  # provide as global var?
+    # check rows
+    if chromosome[0] == correctWord:
+        return TRUE
+    if chromosome[GRID_SIZE] == correctWord:
+        return TRUE
+    # check cols:
+    if chromosome[:, :0] == correctWord:
+        return TRUE
+    if chromosome[:, :GRID_SIZE] == correctWord:
+        return TRUE
+    return False  # if no other result found
+
+# Results Processing
+function ProcessResults(generation, format):
+    # Processes and displays the results of the genetic algorithm
+    # Could involve displaying the best grid, fitness scores, or saving results to a file as per the format variable
+    for chromosome in population:
+        output(chromosome, format)
+
+
+
+
+
+
+
